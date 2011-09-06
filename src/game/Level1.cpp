@@ -30,7 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "CellImpl.h"
-#include "InstanceSaveMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "Mail.h"
 #include "Util.h"
 #ifdef _DEBUG_VMAPS
@@ -102,7 +102,7 @@ bool ChatHandler::HandleNpcWhisperCommand(char* args)
         return false;
 
     ObjectGuid guid = m_session->GetPlayer()->GetSelectionGuid();
-    if (guid.IsEmpty())
+    if (!guid)
         return false;
 
     Creature* pCreature = m_session->GetPlayer()->GetMap()->GetCreature(guid);
@@ -252,8 +252,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
     WorldObject *obj = NULL;
     if (*args)
     {
-        ObjectGuid guid = ExtractGuidFromLink(&args);
-        if (!guid.IsEmpty())
+        if (ObjectGuid guid = ExtractGuidFromLink(&args))
             obj = (WorldObject*)m_session->GetPlayer()->GetObjectByTypeMask(guid, TYPEMASK_CREATURE_OR_GAMEOBJECT);
 
         if(!obj)
@@ -553,14 +552,13 @@ bool ChatHandler::HandleGonameCommand(char* args)
                 // if no bind exists, create a solo bind
                 if (!gBind)
                 {
-                    if (InstanceSave *save = target->GetMap()->GetInstanceSave())
-                    {
-                        // if player is group leader then we need add group bind
-                        if (group && group->IsLeader(_player->GetObjectGuid()))
-                            group->BindToInstance(save, !save->CanReset());
-                        else
-                            _player->BindToInstance(save, !save->CanReset());
-                    }
+                    DungeonPersistentState *save = ((DungeonMap*)target->GetMap())->GetPersistanceState();
+
+                    // if player is group leader then we need add group bind
+                    if (group && group->IsLeader(_player->GetObjectGuid()))
+                        group->BindToInstance(save, !save->CanReset());
+                    else
+                        _player->BindToInstance(save, !save->CanReset());
                 }
             }
 
@@ -1710,7 +1708,7 @@ bool ChatHandler::HandleWhispersCommand(char* args)
 {
     if(!*args)
     {
-        PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, m_session->GetPlayer()->isAcceptWhispers() ?  GetMangosString(LANG_ON) : GetMangosString(LANG_OFF));
+        PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, GetOnOffStr(m_session->GetPlayer()->isAcceptWhispers()));
         return true;
     }
 
@@ -2238,6 +2236,20 @@ bool ChatHandler::HandleModifyDrunkCommand(char* args)
     uint16 drunkMod = drunklevel * 0xFFFF / 100;
 
     m_session->GetPlayer()->SetDrunkValue(drunkMod);
+
+    return true;
+}
+
+bool ChatHandler::HandleSetViewCommand(char* /*args*/)
+{
+    if (Unit* unit = getSelectedUnit())
+        m_session->GetPlayer()->GetCamera().SetView(unit);
+    else
+    {
+        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     return true;
 }

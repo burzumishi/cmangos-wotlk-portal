@@ -19,6 +19,7 @@
 #include "ObjectGridLoader.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "MapPersistentStateMgr.h"
 #include "Creature.h"
 #include "GameObject.h"
 #include "DynamicObject.h"
@@ -57,7 +58,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
 
         Creature * c = iter->getSource();
 
-        MANGOS_ASSERT((!c->IsPet() || !c->IsVehicle()) && "ObjectGridRespawnMover don't must be called for pets");
+        MANGOS_ASSERT(!c->IsPet() && "ObjectGridRespawnMover don't must be called for pets");
 
         Cell const& cur_cell  = c->GetCurrentCell();
 
@@ -179,6 +180,7 @@ ObjectGridLoader::Visit(GameObjectMapType &m)
 
     GridType& grid = (*i_map->getNGrid(i_cell.GridX(),i_cell.GridY())) (i_cell.CellX(),i_cell.CellY());
     LoadHelper(cell_guids.gameobjects, cell_pair, m, i_gameObjects, i_map, grid);
+    LoadHelper(i_map->GetPersistentState()->GetCellObjectGuids(cell_id).gameobjects, cell_pair, m, i_gameObjects, i_map, grid);
 }
 
 void
@@ -193,6 +195,7 @@ ObjectGridLoader::Visit(CreatureMapType &m)
 
     GridType& grid = (*i_map->getNGrid(i_cell.GridX(),i_cell.GridY())) (i_cell.CellX(),i_cell.CellY());
     LoadHelper(cell_guids.creatures, cell_pair, m, i_creatures, i_map, grid);
+    LoadHelper(i_map->GetPersistentState()->GetCellObjectGuids(cell_id).creatures, cell_pair, m, i_creatures, i_map, grid);
 }
 
 void

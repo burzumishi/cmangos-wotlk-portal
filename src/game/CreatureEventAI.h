@@ -187,7 +187,8 @@ struct CreatureEventAI_Action
         // ACTION_T_SET_FACTION                             = 2
         struct
         {
-            uint32 factionId;                               // faction or 0 for default)
+            uint32 factionId;                               // faction id or 0 to restore default faction
+            uint32 factionFlags;                            // flags will restore default faction at evade and/or respawn
         } set_faction;
         // ACTION_T_MORPH_TO_ENTRY_OR_MODEL                 = 3
         struct
@@ -574,13 +575,15 @@ struct CreatureEventAIHolder
 
 class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
 {
-
     public:
         explicit CreatureEventAI(Creature *c);
         ~CreatureEventAI()
         {
             m_CreatureEventAIList.clear();
         }
+
+        void GetAIInformation(ChatHandler& reader);
+
         void JustRespawned();
         void Reset();
         void JustReachedHome();
@@ -608,7 +611,6 @@ class MANGOS_DLL_SPEC CreatureEventAI : public CreatureAI
         inline Unit* GetTargetByType(uint32 Target, Unit* pActionInvoker);
 
         void DoScriptText(int32 textEntry, WorldObject* pSource, Unit* target);
-        void DoMeleeAttackIfReady();
         bool CanCast(Unit* Target, SpellEntry const *Spell, bool Triggered);
 
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event);

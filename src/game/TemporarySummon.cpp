@@ -18,7 +18,6 @@
 
 #include "TemporarySummon.h"
 #include "Log.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 
 TemporarySummon::TemporarySummon( ObjectGuid summoner ) :
@@ -164,7 +163,7 @@ void TemporarySummon::UnSummon()
 {
     CombatStop();
 
-    if (GetSummonerGuid().IsCreature())
+    if (GetSummonerGuid().IsCreatureOrVehicle())
         if(Creature* sum = GetMap()->GetCreature(GetSummonerGuid()))
             if (sum->AI())
                 sum->AI()->SummonedCreatureDespawn(this);

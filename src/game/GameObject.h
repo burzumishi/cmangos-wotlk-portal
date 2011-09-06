@@ -456,6 +456,16 @@ struct GameObjectInfo
         }
     }
 
+    uint32 GetCooldown() const                              // not triggering at detection target or use until coolodwn expire
+    {
+        switch(type)
+        {
+            case GAMEOBJECT_TYPE_TRAP:        return trap.cooldown;
+            case GAMEOBJECT_TYPE_GOOBER:      return goober.cooldown;
+            default: return 0;
+        }
+    }
+
     uint32 GetLinkedGameObjectEntry() const
     {
         switch(type)
@@ -572,6 +582,7 @@ enum LootState
 };
 
 class Unit;
+struct GameObjectDisplayInfoEntry;
 
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
@@ -588,14 +599,18 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void RemoveFromWorld();
 
         bool Create(uint32 guidlow, uint32 name_id, Map *map, uint32 phaseMask, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint8 animprogress, GOState go_state);
-        void Update(uint32 update_diff, uint32 p_time);
+        void Update(uint32 update_diff, uint32 p_time) override;
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;
 
-        uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
+        bool HasStaticDBSpawnData() const;                  // listed in `gameobject` table and have fixed in DB guid
 
-        void UpdateRotationFields(float rotation2 = 0.0f, float rotation3 = 0.0f);
+        // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
+        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
+        void SetWorldRotation(float qx, float qy, float qz, float qw);   
+        void SetTransportPathRotation(float qx, float qy, float qz, float qw);      // transforms(rotates) transport's path
+        int64 GetRotation() const { return m_rotation; }
 
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 locale_idx) const;
@@ -646,6 +661,11 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
+
+        // Functions spawn/remove gameobject with DB guid in all loaded map copies (if point grid loaded in map)
+        static void AddToRemoveListInMaps(uint32 db_guid, GameObjectData const* data);
+        static void SpawnInMaps(uint32 db_guid, GameObjectData const* data);
+
         void getFishLoot(Loot *loot, Player* loot_owner);
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
@@ -655,6 +675,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetGoArtKit(uint8 artkit) { SetByteValue(GAMEOBJECT_BYTES_1, 2, artkit); }
         uint8 GetGoAnimProgress() const { return GetByteValue(GAMEOBJECT_BYTES_1, 3); }
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
+        uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
+        void SetDisplayId(uint32 modelId);
 
         float GetObjectBoundingRadius() const;              // overwrite WorldObject version
 
@@ -703,7 +725,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
 
-        uint64 GetRotation() const { return m_rotation; }
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
@@ -711,7 +732,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         LootState   m_lootState;
         bool        m_spawnedByDefault;
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
-                                                            // For traps this: spell casting cooldown, for doors/buttons: reset time.
+                                                            // For traps/goober this: spell casting cooldown, for doors/buttons: reset time.
 
         typedef std::set<ObjectGuid> GuidsSet;
 
@@ -723,9 +744,10 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         ObjectGuid m_firstUser;                             // first GO user, in most used cases owner, but in some cases no, for example non-summoned multi-use GAMEOBJECT_TYPE_SUMMONING_RITUAL
         GuidsSet m_UniqueUsers;                             // all players who use item, some items activated after specific amount unique uses
 
-        uint32 m_DBTableGuid;                               ///< For new or temporary gameobjects is 0 for saved it is lowguid
         GameObjectInfo const* m_goInfo;
-        uint64 m_rotation;
+        GameObjectDisplayInfoEntry const* m_displayInfo;
+        int64 m_rotation;
+        float m_quatX, m_quatY, m_quatZ, m_quatW;
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
 

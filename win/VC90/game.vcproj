@@ -791,19 +791,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\GuildMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GuildMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\InstanceData.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\InstanceData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.h"
 				>
 			</File>
 			<File
@@ -820,6 +820,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Mail.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MailHandler.cpp"
 				>
 			</File>
 			<File
@@ -840,6 +844,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapPersistentStateMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapPersistentStateMgr.h"
 				>
 			</File>
 			<File
@@ -1035,18 +1047,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\DestinationHolder.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\DestinationHolder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\DestinationHolderImp.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\FleeingMovementGenerator.cpp"
 				>
 			</File>
@@ -1111,10 +1111,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Traveller.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\WaypointMovementGenerator.cpp"
 				>
 			</File>
@@ -1140,6 +1136,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ArenaTeam.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\AuctionHouseBot\AuctionHouseBot.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\AuctionHouseBot\AuctionHouseBot.h"
 				>
 			</File>
 			<File
@@ -1808,6 +1812,62 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\vmap\WorldModel.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Movement"
+			>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSpline.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSpline.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSplineFlag.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSplineInit.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSplineInit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\MoveSplineInitArgs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\packet_builder.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\packet_builder.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\spline.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\spline.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\spline.impl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Movement\typedefs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\movement\util.cpp"
 				>
 			</File>
 		</Filter>
