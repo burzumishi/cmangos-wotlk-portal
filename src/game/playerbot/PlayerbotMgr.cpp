@@ -9,6 +9,7 @@
 #include "../Chat.h"
 #include "../Language.h"
 #include "../WaypointMovementGenerator.h"
+#include "../AccountMgr.h"
 
 class LoginQueryHolder;
 class CharacterHandler;
@@ -1040,7 +1041,9 @@ bool ChatHandler::HandlePlayerbotCommand(char* args)
     }
 
     uint32 accountId = sObjectMgr.GetPlayerAccountIdByGUID(guid);
-    if (accountId != m_session->GetAccountId())
+    AccountTypes bot_security = SEC_PLAYER;
+    bot_security = accountId ? sAccountMgr.GetSecurity(accountId) : SEC_PLAYER;
+    if (accountId != m_session->GetAccountId() && !(m_session->GetSecurity() > bot_security))
     {
         if (!botConfig.GetBoolDefault("PlayerbotAI.SharedBots", true))
         {
