@@ -809,7 +809,8 @@ enum MangosStrings
     LANG_GUILD_VETERAN                  = 813,
     LANG_GUILD_MEMBER                   = 814,
     LANG_GUILD_INITIATE                 = 815,
-    // Room for in-game strings           816-999 not used
+    LANG_FAIL_ENTER_SPECTRAL_REALM      = 816,
+    // Room for in-game strings           817-999 not used
 
     // Level 4 (CLI only commands)
     LANG_COMMAND_EXIT                   = 1000,
@@ -938,7 +939,8 @@ enum MangosStrings
     LANG_AHBOT_ITEMS_AMOUNT             = 1190,
     LANG_AHBOT_ITEMS_RATIO              = 1191,
     LANG_MOVEGENS_EFFECT                = 1192,
-    // Room for more level 3              1193-1199 not used
+    LANG_GEARSCORE                      = 1193,
+    // Room for more level 3              1194-1199 not used
 
     // Debug commands
     LANG_CINEMATIC_NOT_EXIST            = 1200,

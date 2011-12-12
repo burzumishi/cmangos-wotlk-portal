@@ -212,7 +212,7 @@ BattleGround::BattleGround()
     m_Status            = STATUS_NONE;
     m_ClientInstanceID  = 0;
     m_EndTime           = 0;
-    m_BracketId         = BG_BRACKET_ID_FIRST;
+    m_BracketId         = BG_BRACKET_ID_TEMPLATE;
     m_InvitedAlliance   = 0;
     m_InvitedHorde      = 0;
     m_ArenaType         = ARENA_TYPE_NONE;
@@ -286,7 +286,11 @@ BattleGround::~BattleGround()
         DelObject(i);
 
     sBattleGroundMgr.RemoveBattleGround(GetInstanceID(), GetTypeID());
-    sBattleGroundMgr.DeleteClientVisibleInstanceId(GetTypeID(), GetBracketId(), GetClientInstanceID());
+
+    // skip template bgs as they were never added to visible bg list
+    BattleGroundBracketId bracketId = GetBracketId();
+    if (bracketId != BG_BRACKET_ID_TEMPLATE)
+        sBattleGroundMgr.DeleteClientVisibleInstanceId(GetTypeID(), bracketId, GetClientInstanceID());
 
     // unload map
     // map can be null at bg destruction
@@ -1165,6 +1169,13 @@ void BattleGround::StartBattleGround()
     sBattleGroundMgr.AddBattleGround(GetInstanceID(), GetTypeID(), this);
 }
 
+void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry)
+{
+    for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+        if (Player* pPlayer = GetBgMap()->GetPlayer(itr->first))
+            pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
+}
+
 void BattleGround::AddPlayer(Player *plr)
 {
     // remove afk from player
@@ -1388,8 +1399,8 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     // and when loading it (in go::LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
     // so we must create it specific for this instance
     GameObject * go = new GameObject;
-    if(!go->Create(GetBgMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT),entry, GetBgMap(),
-        PHASEMASK_NORMAL, x,y,z,o,rotation0,rotation1,rotation2,rotation3,GO_ANIMPROGRESS_DEFAULT,GO_STATE_READY))
+    if (!go->Create(GetBgMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT),entry, GetBgMap(),
+        PHASEMASK_NORMAL, x,y,z,o, QuaternionData(rotation0,rotation1,rotation2,rotation3)))
     {
         sLog.outErrorDb("Gameobject template %u not found in database! BattleGround not created!", entry);
         sLog.outError("Cannot create gameobject template %u! BattleGround not created!", entry);

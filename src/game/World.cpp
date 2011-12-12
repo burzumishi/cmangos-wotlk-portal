@@ -23,7 +23,6 @@
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
-#include "playerbot/config.h"
 #include "Platform/Define.h"
 #include "SystemConfig.h"
 #include "Log.h"
@@ -64,6 +63,7 @@
 #include "Util.h"
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "CharacterDatabaseCleaner.h"
+#include "CreatureLinkingMgr.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -79,7 +79,6 @@ float World::m_MaxVisibleDistanceInFlight     = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_VisibleUnitGreyDistance        = 0;
 float World::m_VisibleObjectGreyDistance      = 0;
 
-extern Config botConfig;
 float  World::m_relocation_lower_limit_sq     = 10.f * 10.f;
 uint32 World::m_relocation_ai_notify_delay    = 1000u;
 
@@ -1064,7 +1063,13 @@ void World::SetInitialWorldSettings()
     sLog.outString();
 
     sLog.outString( "Loading Gameobject Data..." );
-    sObjectMgr.LoadGameobjects();
+    sObjectMgr.LoadGameObjects();
+
+    sLog.outString( "Loading Gameobject Addon Data..." );
+    sObjectMgr.LoadGameObjectAddon();
+
+    sLog.outString( "Loading CreatureLinking Data..." );    // must be after Creatures
+    sCreatureLinkingMgr.LoadFromDB();
 
     sLog.outString( "Loading Objects Pooling Data...");
     sPoolMgr.LoadFromDB();
@@ -1096,7 +1101,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Creature Respawn Data..." );   // must be after LoadCreatures(), and sMapPersistentStateMgr.InitWorldMaps()
     sMapPersistentStateMgr.LoadCreatureRespawnTimes();
 
-    sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after LoadGameobjects(), and sMapPersistentStateMgr.InitWorldMaps()
+    sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after LoadGameObjects(), and sMapPersistentStateMgr.InitWorldMaps()
     sMapPersistentStateMgr.LoadGameobjectRespawnTimes();
 
     sLog.outString( "Loading UNIT_NPC_FLAG_SPELLCLICK Data..." );
@@ -1190,11 +1195,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Gossip scripts..." );
     sScriptMgr.LoadGossipScripts();                         // must be before gossip menu options
 
-    sLog.outString( "Loading Gossip menus..." );
-    sObjectMgr.LoadGossipMenu();
-
-    sLog.outString( "Loading Gossip menu options..." );
-    sObjectMgr.LoadGossipMenuItems();
+    sObjectMgr.LoadGossipMenus();
 
     sLog.outString( "Loading Vendors..." );
     sObjectMgr.LoadVendorTemplates();                       // must be after load ItemTemplate
@@ -1373,15 +1374,7 @@ void World::SetInitialWorldSettings()
     // Delete all characters which have been deleted X days before
     Player::DeleteOldCharacters();
 
-    //Get playerbot configuration file
-    if (!botConfig.SetSource(_PLAYERBOT_CONFIG))
-        sLog.outError("Playerbot: Unable to open configuration file. Database will be unaccessible. Configuration values will use default.");
-    else
-        sLog.outString("Playerbot: Using configuration file %s",_PLAYERBOT_CONFIG);
-
-    //Check playerbot config file version
-    if (botConfig.GetIntDefault("ConfVersion", 0) != PLAYERBOT_CONF_VERSION)
-        sLog.outError("Playerbot: Configuration file version doesn't match expected version. Some config variables may be wrong or missing.");
+    PlayerbotMgr::SetInitialWorldSettings();
 
     sLog.outString("Initialize AuctionHouseBot...");
     sAuctionBot.Initialize();
@@ -1874,19 +1867,13 @@ void World::ShutdownMsg(bool show, Player* player)
     if(m_ShutdownMask & SHUTDOWN_MASK_IDLE)
         return;
 
-    ///- Display a message every 12 hours, hours, 5 minutes, minute, 5 seconds and finally seconds
-    if ( show ||
-        (m_ShutdownTimer < 10) ||
-                                                            // < 30 sec; every 5 sec
-        (m_ShutdownTimer<30        && (m_ShutdownTimer % 5         )==0) ||
-                                                            // < 5 min ; every 1 min
-        (m_ShutdownTimer<5*MINUTE  && (m_ShutdownTimer % MINUTE    )==0) ||
-                                                            // < 30 min ; every 5 min
-        (m_ShutdownTimer<30*MINUTE && (m_ShutdownTimer % (5*MINUTE))==0) ||
-                                                            // < 12 h ; every 1 h
-        (m_ShutdownTimer<12*HOUR   && (m_ShutdownTimer % HOUR      )==0) ||
-                                                            // > 12 h ; every 12 h
-        (m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
+    ///- Display a message every 12 hours, 1 hour, 5 minutes, 1 minute and 15 seconds
+    if (show ||
+        (m_ShutdownTimer < 5 * MINUTE && (m_ShutdownTimer % 15) == 0) ||            // < 5 min; every 15 sec
+        (m_ShutdownTimer < 15 * MINUTE && (m_ShutdownTimer % MINUTE) == 0) ||       // < 15 min; every 1 min
+        (m_ShutdownTimer < 30 * MINUTE && (m_ShutdownTimer % (5 * MINUTE)) == 0) || // < 30 min; every 5 min
+        (m_ShutdownTimer < 12 * HOUR && (m_ShutdownTimer % HOUR) == 0) ||           // < 12 h; every 1 h
+        (m_ShutdownTimer >= 12 * HOUR && (m_ShutdownTimer % (12 * HOUR)) == 0))     // >= 12 h; every 12 h
     {
         std::string str = secsToTimeString(m_ShutdownTimer);
 

@@ -342,10 +342,9 @@ bool ChatHandler::HandleReloadAllSpellCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadAllGossipsCommand(char* args)
 {
-    HandleReloadGossipMenuCommand((char*)"a");
-    HandleReloadGossipMenuOptionCommand((char*)"a");
     if (*args!='a')                                         // already reload from all_scripts
         HandleReloadGossipScriptsCommand((char*)"a");
+    HandleReloadGossipMenuCommand((char*)"a");
     HandleReloadNpcGossipCommand((char*)"a");
     HandleReloadPointsOfInterestCommand((char*)"a");
     return true;
@@ -440,17 +439,8 @@ bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(char* /*args*/)
 
 bool ChatHandler::HandleReloadGossipMenuCommand(char* /*args*/)
 {
-    sLog.outString( "Re-Loading `gossip_menu` Table!" );
-    sObjectMgr.LoadGossipMenu();
-    SendGlobalSysMessage("DB table `gossip_menu` reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadGossipMenuOptionCommand(char* /*args*/)
-{
-    sLog.outString( "Re-Loading `gossip_menu_option` Table!" );
-    sObjectMgr.LoadGossipMenuItems();
-    SendGlobalSysMessage("DB table `gossip_menu_option` reloaded.");
+    sObjectMgr.LoadGossipMenus();
+    SendGlobalSysMessage("DB tables `gossip_menu` and `gossip_menu_option` reloaded.");
     return true;
 }
 
@@ -7071,6 +7061,34 @@ bool ChatHandler::HandleModifyGenderCommand(char *args)
 
     if (needReportToTarget(player))
         ChatHandler(player).PSendSysMessage(LANG_YOUR_GENDER_CHANGED, gender_full, GetNameLink().c_str());
+
+    return true;
+}
+
+bool ChatHandler::HandleShowGearScoreCommand(char *args)
+{
+    Player *player = getSelectedPlayer();
+
+    if (!player)
+    {
+        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 withBags, withBank;
+    if (!ExtractOptUInt32(&args, withBags, 1))
+        return false;
+
+    if (!ExtractOptUInt32(&args, withBank, 0))
+        return false;
+
+    // always recalculate gear score for display
+    player->ResetCachedGearScore();
+
+    uint32 gearScore = player->GetEquipGearScore(withBags != 0, withBank != 0);
+
+    PSendSysMessage(LANG_GEARSCORE, GetNameLink(player).c_str(), gearScore);
 
     return true;
 }

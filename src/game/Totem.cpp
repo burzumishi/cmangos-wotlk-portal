@@ -64,7 +64,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     if (InstanceData* iData = GetMap()->GetInstanceData())
         iData->OnCreatureCreate(this);
 
-    LoadCreatureAddon();
+    LoadCreatureAddon(false);
 
     return true;
 }
@@ -197,7 +197,7 @@ bool Totem::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex 
         default:
             break;
     }
-    
+
     if (!IsPositiveSpell(spellInfo))
     {
         // immune to all negative auras
