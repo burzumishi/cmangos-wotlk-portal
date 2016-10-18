@@ -195,7 +195,7 @@ add_executable(genrev
 )
 
 add_custom_target("revision.h" ALL
-  COMMAND genrev ${CMAKE_SOURCE_DIR}
+  COMMAND genrev ${CMAKE_CURRENT_SOURCE_DIR}
   WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
   DEPENDS genrev
 )

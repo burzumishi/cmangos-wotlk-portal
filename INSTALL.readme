@@ -1,0 +1,847 @@
+Installation Instructions
+=========================
+
+How to install C(ontinued)-MaNGOS from scratch and how to update it.
+
+This Guide will help you for Windows or *nix (Ubuntu, Debian) and for all supported clients: Classic - TBC - WotLK - Cata - WoD.
+
+Instructions covering Mac OS X (10.6 & 10.7) specific steps are available https://github.com/cmangos/issues/wiki/Build-CMaNGOS-for-Mac-OS-X[here] in addition of this guide.
+
+For other environments (like FreeBSD, ARM and similar) please consider our http://cmangos.net/forum-5.html[Installation, Configuration & Upgrades - Subforum] for assistance.
+
+If you run into issues during installation or need help understanding one of the following steps, please visit http://cmangos.net/forum-5.html[our forum] to look for solutions and ask questions.
+
+These Installation Instructions are expected to be current, so please read through every step again to ensure that you didn't skip or misunderstand something before going to the forums.
+
+If you are an absolute beginner to programming and compiling then you may want to go through the https://github.com/cmangos/issues/wiki/Beginners-Guide-Home[Beginner's Guide] first.
+
+
+Addresses
+---------
+
+ * CMaNGOS: http://www.cmangos.net[forum] | https://github.com/cmangos[git repositories] | http://qchat.rizon.net/?channels=%23cmangos[irc] (irc.rizon.net #cmangos)
+ * boost: http://www.boost.org[main page]
+ * ScriptDev2: http://cmangos.net/forum-32.html[forum] | https://github.com/scriptdev2[SD2 git repositories] | http://qchat.rizon.net/?channels=%23scriptdev2[irc] (irc.rizon.net #scriptdev2)
+ * ACID: http://cmangos.net/forum-34.html[forum] | https://github.com/ACID-Scripts[git repositories] | http://qchat.rizon.net/?channels=%23aciddev[irc] (irc.rizon.net #aciddev)
+ * UDB: https://github.com/cmangos/wotlk-db/issues[forum] | https://github.com/cmangos/wotlk-db.git[git repository]
+ * UDB 4.3.4: http://udb.no-ip.org/index.php[forum, scroll down to UDB 4.3.4] | https://github.com/UDB-434/Database[git repository]
+ * TBC-DB: http://udb.no-ip.org/index.php[forum, scroll down to TBC] | https://github.com/TBC-DB/Database[git repository]
+ * YTDB: http://ytdb.ru[forum] | http://svn2.assembla.com/svn/ytdbase/[svn repository]
+ * PSDB: http://project-silvermoon.forumotion.com/[forum] | http://subversion.assembla.com/svn/psmdb_wotlk/[svn repository]
+ * ClassicDB: https://github.com/classicdb[Project main site on GitHub] | https://github.com/classicdb/database[git repository]
+
+
+Software requirements (Windows)
+-------------------------------
+
+Game client of:
+
+ * World of Warcraft Classic (1.12.x) for cmangos-classic
+ * World of Warcraft TBC (2.4.3) for cmangos-tbc
+ * World of Warcraft WotLK (3.3.5a) for for cmangos-wotlk
+ * World of Warcraft Cataclysm (4.3.4) for for cmangos-cata
+
+Some tools:
+
+ * Git: https://git-scm.com/[Main Download Page]. Select the "Git Bash Here" and "Use Git Bash only" options from the respective pages of the http://tinypic.com/view.php?pic=v45smh&s=6#.V2vSH_krKHs[install Wizard] in order to follow along with these instructions; otherwise, just use the default install options. __Alternatively, you can install (http://sourceforge.net/projects/gitextensions/files/latest/download)[Git Extensions] instead, which comes with Git, MySYSGit, and KDiff).__
+ * Visual C++ 2013 or newer: http://www.microsoft.com/express/Downloads/[Visual Studio Express] (Visual Studio Express 2013 is recommended).
+ * Any MySQL server such as http://dev.mysql.com/downloads/mysql/[MySQL server community edition] or http://www.apachefriends.org/en/xampp.html[XAMPP].
+ * Any MySQL client (optional, for easy database access) such as http://dev.mysql.com/downloads/workbench/[MySQL Workbench] or http://code.google.com/p/sqlyog/downloads/list[SQLyog]
+ * SVN (optional, for easy database download): http://tortoisesvn.net/downloads[Tortoise SVN].
+ * An advanced text editor (optional) such as http://notepad-plus-plus.org/[Notepad++]. Definitely not required but will make editing the configuration files much easier in later steps.
+
+
+Software requirements (*nix)
+----------------------------
+
+You will need Git, GCC, CMake, MySQL, SVN, Boost and a few libraries
+
+### Ubuntu (12.04)
+
+  sudo apt-get install build-essential gcc g++ automake git-core autoconf make patch libmysql++-dev mysql-server libtool libssl-dev grep binutils zlibc libc6 libbz2-dev cmake subversion libboost-all-dev
+
+### Debian
+
+  apt-get install grep build-essential gcc g++ automake git-core autoconf make patch cmake libmysql++-dev mysql-server libtool libssl-dev binutils zlibc libc6 libbz2-dev subversion libboost-all-dev
+
+### Fedora
+
+  dnf install git cmake gcc patch autoconf mariadb-server mariadb-devel libtool zfstream gcc-c++ subversion boost-devel
+
+_Note: installing boost-devel has not been tested yet._
+
+
+Essentials
+----------
+
+CMaNGOS::
+  is the server, also called "core", which manages all the game inquiries and accesses your SQL Database to get the information needed.
+
+ScriptDev2::
+  is an optional library which contains C++ scripts that, when added to CMaNGOS, handles special events, quests, encounters and bosses.
+*AS OF 11/1/2015 ScriptDev2 HAS BEEN INTEGRATED INTO THE "CORE"*
+
+ACID::
+  stands for "Advanced Creature Intelligence Database". It is an optional SQL database that handles regular mobs and bosses. ACID and ScriptDev2 complement each other and you should use both. ACID is usually already included in the database shipped by the database providers.
+
+Database::
+  in the context of CMaNGOS installation is usually referring to the world database, which contains all of the content of the game world run by CMaNGOS.
+  These are the main database providers that sync up with CMaNGOS:
+  - UDB (for WotLK - 3.3.5a)
+  - YTDB (for WotLK - 3.3.5a)
+  - PSDB (for WotLK - 3.3.5a)
+  - TBC-DB (for TBC - 2.4.3)
+  - ClassicDB (for Classic - 1.12.1)
+
+All have their own advantages and disadvantages. Which one you use is your choice!
+
+World Of Warcraft Client::
+  is a client to connect to the server. It's your own copy of the game.
+
+
+Tools
+-----
+
+Git::
+  is a free distributed revision control or source code management tool which allows you to easily manage a virtual filesystem. With this tool, you'll download the code from CMaNGOS, ScriptDev2, and ACID.
+
+SVN::
+   has a similar purpose as Git but for a different type of support. With this tool, you'll download the database from the database providers.
+
+Microsoft Visual C++::
+  is used to created, modify and compile the code using C and C++ programming languages. With this tool, you'll compile CMaNGOS and ScriptDev2 on Windows.
+
+MySQL server::
+  is a relational database management system (RDBMS) that runs as a server providing multi-user access to a number of databases. After you've created the databases and imported the data, they will contain your entire world for World of Warcraft.
+
+MySQL client::
+  allows you to connect to the MySQL server by providing an easy-to-use interface to import and change the data in the database.
+
+IRC::
+  is a simple chat system that is used by supporters and developers of CMaNGOS.
+
+
+How things fit together
+-----------------------
+
+The following parts exist:
+
+ - Server services: The binary files +mangosd(.exe)+ and +realmd(.exe)+ manage the communication with the client
+ - World database: This database is filled by the database provider and contains content like NPCs, quests and objects
+ - Characters database: Contains the information about characters like player-name, level and items
+ - Realmd database: This database contains account-information (account-name, password and such)
+ - Client: Which will, with adapted *realmlist*, connect to your server
+
+
+Get the remote data to your system
+----------------------------------
+
+It is a good idea to start off your installation with some basic directory structure. See the below options depending on your operating system and follow along.
+
+#### For Windows
+
+For this guide we will assume that you will use +C:\Mangos+ as base directory under which you put everything.
+
+All shell commands are expected to be typed from a *Git bash* started from the +C:\Mangos+ directory. To do so, right-click onto +C:\Mangos+ in the windows explorer, and select +Git bash here+ from the context menu.
+
+#### For *nix
+
+create a new user to run your mangos server under
+
+ useradd -m -d /home/mangos -c "MANGoS" -U mangos
+
+This guide assumes you will use this new user personnal folder (+/home/mangos+) as a base folder under which you will put everything.
+
+ cd /home/mangos
+
+
+Clone CMaNGOS
+~~~~~~~~~~~~~
+
+After having opened Git bash in the right folder, simply type:
+
+ git clone git://github.com/cmangos/mangos-wotlk.git mangos
+
+Other versions for different clients:
+
+ * Vanilla:
+
+ git clone git://github.com/cmangos/mangos-classic.git mangos
+
+ * The burning Crusade:
+
+ git clone git://github.com/cmangos/mangos-tbc.git mangos
+
+ * Cataclysm :
+
+ git clone git://github.com/cmangos/mangos-cata.git mangos
+
+Submit this git command with enter/return. This will take a little time to complete, but afterwards you will have created a sub-directory named +mangos+ into which the CMaNGOS sources are cloned.
+
+
+Clone ACID
+~~~~~~~~~~
+
+This is considered optional, as ACID is usually included by the database providers.
+
+ git clone git://github.com/ACID-Scripts/WOTLK.git acid
+
+
+Other versions for different clients:
+
+ * Vanilla:
+
+ git clone git://github.com/ACID-Scripts/Classic.git acid
+
+ * The burning Crusade:
+
+ git clone git://github.com/ACID-Scripts/TBC.git acid
+
+ * Cataclysm :
+
+ git clone git://github.com/ACID-Scripts/CATA.git acid
+
+
+Get the world-database stuff
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+UDB (WotLK)
+^^^^^^^^^^^
+* Open ++C:\Mangos++ with git bash.
+
+ git clone git://github.com/cmangos/wotlk-db.git
+
+This will create a new subfolder "Database" in which the SQL-files are located.
+
+UDB 4.3.4(CATA)
+^^^^^^^^^^^^^^^
+* Open ++C:\Mangos++ with git bash.
+
+ git clone git://github.com/UDB-434/Database.git
+
+This will create a new subfolder ++Database++ in which the SQL-files are located.
+
+TBC-DB (TBC)
+^^^^^^^^^^^
+* Open ++C:\Mangos++ with git bash.
+
+ git clone git://github.com/TBC-DB/Database.git tbc-db
+
+This will create a new folder (likely ++C:\Mangos\tbc-db++) in which TBC-DB SQL-files are located.
+
+YTDB (WotLK)
+^^^^^^^^^^^^
+*On Windows*
+
+* Open ++C:\Mangos++ in the explorer, right-click on the right hand side
+* Select "Tortoise SVN Checkout" from the context menu.
+* Insert as SVN-URL: ++http://svn2.assembla.com/svn/ytdbase/++
+
+*On *nix*
+
+ svn co http://svn2.assembla.com/svn/ytdbase/
+
+This will create a new folder (likely ++ytdbase++) in which YTDB SQL-files are located.
+
+YTDB (CATA)
+^^^^^^^^^^^^
+*On Windows*
+
+* Open ++C:\Mangos++ in the explorer, right-click on the right hand side
+* Select "Tortoise SVN Checkout" from the context menu.
+* Insert as SVN-URL: ++http://svn2.assembla.com/svn/ytdbase/Mangos/Cataclysm/++
+
+*On *nix*
+
+ svn co http://svn2.assembla.com/svn/ytdbase/Mangos/Cataclysm ytdbase/
+
+This will create a new folder (likely ++ytdbase++) in which YTDB SQL-files are located.
+
+PSDB (WotLK)
+^^^^^^^^^^^^
+*On Windows*
+
+* Open ++C:\Mangos++ in the explorer, right-click on the right hand side
+* Select "Tortoise SVN Checkout" from the context menu.
+* Insert as SVN-URL: ++http://svn.assembla.com/svn/psmdb_wotlk/++
+
+*On *nix*
+
+ svn co http://svn.assembla.com/svn/psmdb_wotlk/
+
+This will create a new folder (likely ++psmdb_wotlk++) in which PSDB SQL-files are located.
+
+ClassicDB (Classic)
+^^^^^^^^^^^^^^^^^^^
+* Open ++C:\Mangos++ with git bash.
+
+ git clone git://github.com/classicdb/database.git classicdb
+
+This will create a new subfolder ++classicdb++ in which the ClassicDB SQL-files are located.
+
+
+Directory structure
+~~~~~~~~~~~~~~~~~~~
+
+Now you should have the following subfolders:
+
+ - ++mangos++ (containing the sources of CMaNGOS and optionally ScriptDev2)
+ - ++acid++ (containing the content of ACID, this is optional)
+ - ++unifieddb++ OR ++ytdbase++ OR ++psmdb_wotlk++ OR ++tbc-db++ OR ++classicdb++ containing the content of your database-provider
+
+For windows we suggest creating an additional ++run++ folder, on *nix this can be useful if you don't want to install to ++/opt++ or so
+
+ - ++run++
+
+For *nix or cmake compile we suggest creating an additional ++build++ folder, this is not required for Visual C++
+
+ - ++build++
+
+
+Compiling CMaNGOS and ScriptDev2
+--------------------------------
+
+Installing and Configuring boost (UNIX)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The CMaNGOS cmake scripts should automatically detect the location of your boost installation, and configure the build accordingly.  If it is not detected, please ensure that your BOOST_ROOT environment variable is set properly.
+
+On most *nix you just have to install boost development libraries from your distribution package repositories.
+
+On Debian and Ubuntu you can simply install the ++libboost-all-dev++ meta-package. On Fedora there should be a package named ++boost-devel++ (untested). If you followed the https://github.com/cmangos/issues/wiki/Installation-Instructions#software-requirements-nix[Software requirements (*nix)] step above you should have the respective package installed already.
+
+For instructions on how to compile boost from source code or general information, see the boost http://www.boost.org/more/getting_started/index.html[Getting Started] guide.
+
+Installing and Configuring boost (Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Go to http://sourceforge.net/projects/boost/files/boost-binaries/
+- Select the folder with the highest version number (1.61.0 at the time of this writing)
+- Download the correct version as indicated below *or* the ++boost_x_xx_x-bin-msvc-all-32-64.7z++. If you need the Win32 or x64 version depends on what architecture you would like your compiled server executable to use. For most people x64 is fine.
+ * Note: *This has nothing to do with your Windows version*, apart from the fact that 64bit executables will not run on a 32bit Windows. It is very unlikely you have a 32bit OS but if you want to make sure that you have a 64bit one press <Win>+<Pause>.
+ *  Note: You can install both the Win32 and the x64 binaries into the same directory, in case you want to switch build architectures. Visual Studio will automatically select the correct version.
+
+[width="40%",cols=">s,^2e,^2e",frame="topbot",options="header"]
+|======================
+|         |Win32                         |x64
+|VS 2013  |boost_x_xx_x-msvc-12.0-32.exe |boost_x_xx_x-msvc-12.0-64.exe
+|VS 2015  |boost_x_xx_x-msvc-14.0-32.exe |boost_x_xx_x-msvc-14.0-64.exe
+|======================
+
+- Install the downloaded binaries.
+- Go to the *PC Properties* (press *<Win>+<Pause>*)
+- Click on *Advanced System Settings*
+- Click on *Environment Variables*
+- At the bottom under *System variables* click *New*
+ * Name: *BOOST_ROOT*
+ * Value: *C:\local\boost_x_xx_x* _Replace the x with the version number you downloaded, e.g. boost_1_61_0._
++
+--
+  - If you changed the path while installing the binaries, you will have to do that here as well.
+--
+ * Confirm
+
+Additional remarks regarding boost for advanced users (Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you are not using cmake, the built-in project files assume that BOOST_ROOT environment variable is set.
+
+If you have already boost in another folder schema you can also define 'BOOST_LIBRARYDIR' to point to the right folder. Then only win32 or x64 will work according to the file you have on that folder.
+
+If you are using cmake to generate a solution and project files, the CMaNGOS cmake scripts should automatically detect the location of your boost installation, and configure the build accordingly.  If it is not detected, please ensure that your BOOST_ROOT environment variable is set properly.
+
+For instructions on how to compile boost from source code or general information, see the boost http://www.boost.org/more/getting_started/index.html[Getting Started] guide.
+
+Note: In a typical boost installation environment with Visual Studio, the user will configure their Visual Studio property sheets to point to the boost installation.  This will allow boost to be found by all projects on that system.  For information on configuring property sheets, look https://msdn.microsoft.com/en-us/library/669zx6zc.aspx[here].
+
+Compiling CMaNGOS and ScriptDev2 (Windows)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Go to your ++C:\Mangos\mangos\win++ folder
+* Open the "sln" file that fits your version of Visual C++
+  - mangosdVC120.sln for Visual C++ 2013
+  - mangosdVC140.sln for Visual C++ 2015
+* Wait for Visual C++ to finish loading.
+* Open the menu "Build" -> "Configuration Manager"
+  - Choose "Release" in the drop down box for "Active Solution Configuration"
+  - The drop down box "Active Solution Platform" should be set to "Win32" by default. Change it to "x64" if you want to compile 64bit executables. (This setting has to correspond with the boost version you installed.)
+  - Close the window
+* Click the menu "Build" -> "Build Solution"
+  - This will take some time.
+  - You might get some warning messages. Don't worry about it, that's normal.
+  - You must not get any error messages, although if you do so, you could click the menu "Build" -> "Clean Solution" to restart the compile.
+
+If you cannot solve an error, please use the official forums or IRC channels to ask for help
+
+Compiling CMaNGOS and ScriptDev2 (*nix)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Go to your ++/home/mangos++ folder
+
+ cd /home/mangos
+
+* Enter the build folder:
+
+ cd build
+
+* Invoke ++cmake ../mangos++, suggested options are:
+  - ++-DCMAKE_INSTALL_PREFIX=\../mangos/run++ to install into the "run" subfolder of /home/mangos folder, otherwise this will install to /opt/mangos
+  - ++-DPCH=1++ to compile with PCH mode (much faster after updates). **(currently DPH doesn't work, set it to 0)**
+  - ++-DDEBUG=0++ to remove debug mode from compiling
+  - *examples:*
+
+ cmake ../mangos -DCMAKE_INSTALL_PREFIX=\../mangos/run -DPCH=1 -DDEBUG=0  <--- Just want to compile CMaNGOS
+ cmake ../mangos -DCMAKE_INSTALL_PREFIX=\../mangos/run -DBUILD_EXTRACTOR=ON -DBUILD_VMAP_EXTRACTOR=ON -DBUILD_MMAP_EXTRACTOR=ON -DPCH=1 -DDEBUG=0  <--- Want compile CMaNGOS & the map extraction tools
+
+* Invoke ++make++ to compile CMaNGOS and ScriptDev2
+
+ make
+
+* Invoke ++make install++ to install to your "run" directory
+
+ make install
+
+
+Install CMaNGOS binary files
+----------------------------
+* Transfer the files from your compile folder (likely ++C:\Mangos\mangos\bin\Win32_Release++) into ++C:\Mangos\run++
+* Go to ++C:\Mangos\mangos\src\mangosd++ and copy ++mangosd.conf.dist.in++ to ++C:\Mangos\run++ and rename it to ++mangosd.conf++
+* Go to ++C:\Mangos\mangos\src\realmd++ and copy ++realmd.conf.dist.in++ to ++C:\Mangos\run++ and rename it to ++realmd.conf++
+* Go to ++C:\Mangos\mangos\src\game\AuctionHouseBot++ and copy ++ahbot.conf.dist.in++ to ++C:\Mangos\run++ and rename it to ++ahbot.conf++
+
+On *nix this is partly done with the ++make install++ command (from the build directory).
+
+You will however still need to manually copy and rename the .conf.dist files to .conf files.
+
+
+Extract files from the client
+-----------------------------
+
+Windows
+~~~~~~~
+* Copy the content of ++C:\Mangos\mangos\contrib\extractor_binary\++ into your ++C:\World of Warcraft++ folder
+* Run ++ExtractResources.sh++ from your ++C:\World of Warcraft++.
+
+For this you can open a "Git Bash" on your C:\World of Warcraft folder and type ++ExtractResources.sh++
+
+Depending on your installation settings, a simple double click onto the ++ExtractResources.sh++ file from your explorer might also work.
+
+You must extract *DBC/maps* and *vmaps* for CMaNGOS to work, *mmaps* are optional (and take very long)
+
+* When finish, move the folders ++maps++, ++dbc++ and ++vmaps++ - optionally ++mmaps++ - that have been created in your ++C:\World of Warcraft++ to your ++C:\Mangos\run++ (the buildings folder is not required and can be deleted).
+
+*nix
+~~~~
+On *nix this step is more complicated, you'll have to recompile all extractor tools.
+
+It is actually suggested to extract the client files from a Windows system.
+You need to copy them (by default configuration) into the directory into which you installed CMaNGOS:
+
+ /mangos/run/bin
+
+If you want to stick to *nix or have no Windows system at your disposal see http://cmangos.net/thread-7481-post-46129.html#pid46129[here] (step 11) and http://cmangos.net/thread-7481-post-46306.html#pid46306[here] for information on how to do everything on *nix.
+
+Install databases
+-----------------
+For this section it is assumed you have already installed your MySQL server, and have a password for "root" user.
+
+To make use of some additional installation helper scripts it is HIGHLY suggested when installing MYSQL you include the command path to the BIN folder (Option during Install). If this option was not available or if you missed it please follow the instructions found http://dev.mysql.com/doc/mysql-windows-excerpt/5.1/en/mysql-installation-windows-path.html[here] before proceeding. If you don't have this configured properly then you will not be able to follow along with the command-line steps below in the guide because the command prompt will not recognize "mysql" as a valid command.
+
+Create empty databases
+~~~~~~~~~~~~~~~~~~~~~~
+Either use a GUI tool for mysql and open the SQL-files, or do it by command-line as this guide shows.
+
+From the C:\Mangos folder invoke (in Git bash):
+
+* ++mysql -uroot -p < mangos/sql/create/db_create_mysql.sql++
++
+And enter your password in the following dialogue (similar in all other next steps)
++
+This will create a user (name mangos, password mangos) with rights to the databases "mangos" (world-db), characters and realmd
+
+Initialize Mangos database
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+From the C:\Mangos folder invoke (in Git bash):
+
+* ++mysql -uroot -p mangos < mangos/sql/base/mangos.sql++
++
+This will create and fill the Mangos database with some values.
+
+Initialize characters database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+From the C:\Mangos folder invoke (in Git bash):
+
+* ++mysql -uroot -p characters < mangos/sql/base/characters.sql++
++
+This will create an empty characters database.
+
+Initialize realmd database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+From the C:\Mangos folder invoke (in Git bash):
+
+* ++mysql -uroot -p realmd < mangos/sql/base/realmd.sql++
++
+This will create an empty realmd database.
+
+Fill world database:
+~~~~~~~~~~~~~~~~~~~~
+*Support for UDB.*
+
+* Unzip the zip file in C:\Mangos\unifieddb\trunk\Full_DB
+
+From the C:\Mangos folder invoke (in Git bash or depending on installation with double-click!)
+
+* ++cd unifieddb/trunk++
+* ++InstallFullUDB.sh++
++
+This will create a config file named "InstallFullUDB.config", looking like:
++
+-----------------------
+####################################################################################################
+# This is the config file for the './InstallFullDB.sh' script
+#
+# You need to insert
+#   MANGOS_DBHOST:      Your MANGOS database host
+#   MANGOS_DBNAME:      Your MANGOS database schema
+#   MANGOS_DBUSER:      Your MANGOS username
+#   MANGOS_DBPASS:      Your MANGOS password
+#   CORE_PATH:          Your path to core's directory (OPTIONAL: Use if you want to apply remaining core updates automatically)
+#   ACID_PATH:          Your path to a git-clone of ACID (OPTIONAL: Use it if you want to install recent downloaded acid)
+#   MYSQL:              Your mysql command (usually mysql)
+#
+####################################################################################################
+
+## Define the host on which the mangos database resides (typically localhost)
+MANGOS_DBHOST="localhost"
+
+## Define the database in which you want to add clean UDB
+MANGOS_DBNAME="mangos"
+
+## Define your username
+MANGOS_DBUSER="mangos"
+
+## Define your password (It is suggested to restrict read access to this file!)
+MANGOS_DBPASS="mangos"
+
+## Define the path to your core's folder (This is optional)
+##   If set the core updates located under sql/updates/mangos from this mangos-directory will be added automatically
+CORE_PATH=""
+
+## Define the path to the folder into which you cloned ACID (This is optional)
+##   If set the file acid_wotlk.sql will be applied from this folder
+ACID_PATH=""
+
+## Define your mysql programm if this differs
+MYSQL="mysql"
+
+# Enjoy using the tool
+-----------------------
+
+* Change configuration in any text-editor
++
+With the default configuration, you only need to change CORE_PATH to:
++
+-----------------------
+CORE_PATH="/c/Mangos/mangos"
+(for *nix /home/mangos/mangos)
+-----------------------
+*
+You may actually have to set ++CORE_PATH="../mangos"++ (assuming default paths from this guide), if the tilde is not properly resolved into your home folder path, causing InstallFullUDB.sh to complain about not finding "/home/mangos/mangos". Tested on openSUSE 12.3.
+
+* Now the helper tool is configured, and you only need to run the helper script, whenever you want to set your world database to a clear state!
+* ++sh ./InstallFullUDB.sh++
++
+And check the output if the database could be set up correctly. If the helper script complains about not finding the config file, just open InstallFullUDB.sh in a text editor and set
++
+-----------------
+SCRIPT_FILE="./InstallFullDB.sh"
+CONFIG_FILE="./InstallFullUDB.config"
+-----------------
+
+* You can now run the script again, and it should start filling your world database.
+
+* ++cd ../..++
+
+*Support for PSDB.*
+
+* Execute PSDB_Installer in psmdb_wotlk svn folder.
+* Type your info when prompted.
+* You can also edit PSDB_Installer.bat for quick re-install of PSDB & Scriptdev2 DB by changing "set   quick=on" & "set pass=".
++
+Example of PSDB_Installer.bat:
++
+-----------------------
+####################################################################################################
+8888888b.   .d8888b.  8888888b.  888888b.  (LK)
+888   Y88b d88P  Y88b 888  "Y88b 888  "88b
+888    888 Y88b.      888    888 888  .88P
+888   d88P  "Y888b.   888    888 8888888K.
+8888888P"      "Y88b. 888    888 888  "Y88b
+888              "888 888    888 888    888
+888        Y88b  d88P 888  .d88P 888   d88P
+888         "Y8888P"  8888888P"  8888888P"
+
+Credits to: Factionwars, Nemok and BrainDedd
+
+What is your MySQL host name?           [localhost]   :
+What is your MySQL user name?           [root]        :
+What is your MySQL password?            [ ]           :
+What is your MySQL port?                [3306]        :
+What is your World database name?       [mangos]      :
+What is your ScriptDev2 database name?  [scriptdev2]  :
+What is your Characters database name?  [characters]  :
+What is your Realmd database name?      [realmd]      :
+
+This will wipe out your current World database and replace it.
+Do you wish to continue? (y/n)
+
+This will wipe out your current ScriptDev2 database and replace it.
+Do you wish to continue? (y/n)
+
+This will wipe out your current Characters database and replace it.
+Do you wish to continue? (y/n)
+
+This will wipe out your current Realm database and replace it.
+Do you wish to continue? (y/n)
+
+This will optimize your current database.
+Do you wish to continue? (y/n)
+####################################################################################################
+-----------------------
+*Support for YTDB Needed.*
+*Support for TBCDB.*
+
+* Support is for Linux (Debian)
+* Go to root
+
+ cd tbc-db
+ cd Current_Release
+ cd Full_DB
+ mysql -uroot -p mangos < ~/tbc-db/Current_Release/Full_DB/TBCDB_1.4.0_cmangos-tbc_s1982_SD2-TBC_s2720.sql ++
+
+* Enter SQL root password
+
+*Support for ClassicDB.*
+
+* Enter your classicDB directory (by default 'C:\Mangos')
+* Invoke
+
+ cd classicdb
+ ./InstallFullDB.sh
+
+* Edit the created conf file ++InstallFullDB.config++. See above on Installing UDB for explanation of the options.
+* Rerun the installer script, invoke
+
+ ./InstallFullDB.sh
+
+* Exit the classicDB directory with
+
+ cd ..
+
+
+Also consider https://github.com/classicdb/database/blob/classic/README.mdown for further information.
+
+
+Fill ScriptDev2 database:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ mysql -uroot -p mangos < mangos/sql/scriptdev2/scriptdev2.sql
+
+
+Fill ACID to world-database:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This is considered optional, as ACID is usually included by the database providers.
+
+But if you prefer bleeding edge, invoke (from C:\Mangos)
+
+ mysql -uroot -p mangos < acid/acid_wotlk.sql
+
+
+Basic concept of database filling
+---------------------------------
+The database providers provide
+
+A full-dump release file::
+  This file contains the whole database content of one point
+Updatepacks::
+  An updatepack consist of
+  - collected core updates for the mangos (world) database
+  - collected core updates for the characters database
+  - collected core updates for the realmd database
+  - content fixes
+
+So you need to:
+
+* Apply the latest release file
+* Apply all following updatepack files (always corepatches before updatepacks)
+* Apply the remaining updates from the core (located in C:\Mangos\mangos\sql\updates
+
+
+Configuring CMaNGOS
+--------------------
+This part should be an extra wiki-page: Meaning of config files from mangos/sd2
+
+With the default installations, you should get a working environment out of the box :)
+
+
+(OPTIONAL) Update *.conf files
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You will need to manually update the configuration files within your "run" directory (ie C:\Mangos\run ).
+
+The files are:
+* mangosd.conf: Holds configuration for the mangosd executable
+* realmd.conf: Holds configuration for the realmd executable
+* scriptdev2.conf: Holds configuration for ScriptDev2's settings(no longer used and may not exist)
+* (Very optional) ahbot.conf: Holds configuration for AHBot (by default disabled)
+
+Most important to configure are the database settings. You will need this if you decided to use a different password/user then the "default" combination of mangos/mangos.
+
+These settings are relatively self-explaining, you should look for the settings of "LoginDatabaseInfo", "WorldDatabaseInfo", "CharacterDatabaseInfo" and "ScriptDev2DatabaseInfo" (no file contains all of these options)
+
+
+(OPTIONAL) Update realmd.realmlist
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You need to change this only if you changed the mangosd.conf settings "WorldServerPort" or "RealmID"
+
+This information is required so that the realmd "knows" to which mangosd he should forward a player after authentication, so if you want to use your server outside itself (e.g. on your LAN) please change ++127.0.0.1++ by your server ip !
+
+Apply code to realmd database, adapt to your wishes
+
+ DELETE FROM realmlist WHERE id=1;
+ INSERT INTO realmlist (id, name, address, port, icon, realmflags, timezone, allowedSecurityLevel)
+ VALUES ('1', 'MaNGOS', '127.0.0.1', '8085', '1', '0', '1', '0');
+
+
+Where of course the data must match the configs:
+
+* port (above 8085) must match the value in the mangosd.conf (Config option: "WorldServerPort")
+* id (above 1) must match the value in the mangosd.conf (Config option: "RealmID")
+
+
+Configuring your WoW-Client
+---------------------------
+* Copy ++C:\World Of Warcraft\Data\enEN\realmlist.wtf++ to ++realmlist.old++ within the same folder
+
+Your locale folder may be named differently according to your region ("enUS", "enGB", "frFR", "deDE", etc)
+
+* Open ++realmlist.wtf++ in Notepad and change the contents to the following:
+
+ set realmlist 127.0.0.1
+
+*Always use the wow.exe and NOT the launcher to start your WoW-Client*
+
+
+Additional settings for Cata client:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You should:
+
+1. Use a patched wow.exe
+2. Add ++set patchlist localhost++ line in addition to realmlist line in realmlist.wtf
+3. Delete or rename wow.mfil and wow.tfil files
+
+
+Running your Server
+-------------------
+
+On Windows system launch ++C:\Mangos\run\mangosd.exe++ and ++C:\Mangos\run\realmd.exe++
+
+On *nix run the corresponding binary files :
+
+ /home/mangos/mangos/run/bin/mangosd -c /home/mangos/mangos/run/etc/mangosd.conf -a /home/mangos/mangos/run/etc/ahbot.conf
+
+ /home/mangos/mangos/run/bin/realmd -c /home/mangos/mangos/run/etc/realmd.conf
+
+
+#### Tip1
+**Don't run mangosd or realmd as root !**
+
+ su mangos
+
+This command will connect you as *mangos* user.
+
+#### Tip2
+you can run mangosd and realmd in separate screens
+
+ exec screen -dmS mangosd /home/mangos/mangos/run/bin/mangosd -c /home/mangos/mangos/run/etc/mangosd.conf -a /home/mangos/mangos/run/etc/ahbot.conf
+
+ exec screen -dmS realmd /home/mangos/mangos/run/bin/realmd -c /home/mangos/mangos/run/etc/realmd.conf
+
+
+#### Tip3
+if you want to start mangosd and realmd at your server boot, you can use a cron task. create a ++/home/mangos/cmangos-launcher.sh++ file with this content :
+
+  #!/bin/bash
+  exec screen -dmS mangosd /home/mangos/mangos/run/bin/mangosd -c /home/mangos/mangos/run/etc/mangosd.conf -a /home/mangos/mangos/run/etc/ahbot.conf++
+  exec screen -dmS realmd /home/mangos/mangos/run/bin/realmd -c /home/mangos/mangos/run/etc/realmd.conf++
+
+and then, as ++mangos++ user, run ++crontab -e++ and add this line :
+
+  @reboot /bin/bash /home/mangos/cmangos-launcher.sh
+
+It'll run this script at your server boot.
+
+
+Creating first account:
+-----------------------
+
+Once everything in mangosd has loaded, here are some commands you can use.
+
+In your Mangosd window, there is tons of text; not to worry, keep typing anyway, it doesn't matter
+
+#### Creating the actual account
+
+ account create [username] [password]
+
+Example:
+
+ account create MyNewAccount MyPassword
+
+#### Enabling expansions for a user
+
+ account set addon [username] [0 to 3]
+
+ * 0) Basic version
+ * 1) The Burning Crusade
+ * 2) Wrath of the Lich King
+ * 3) Cataclysm
+
+Example:
+
+ account set addon MyNewAccount 2
+
+#### Changing GM levels
+
+ account set gmlevel [username] [0 to 3]
+
+ * 0) Player
+ * 1) Moderator
+ * 2) Game Master
+ * 3) Administrator
+
+Example:
+
+ account set gmlevel MyNewAccount 2
+
+#### Shutdown your server
+
+ .server shutdown [delay]
+
+The delay is the number of seconds
+
+
+First login:
+------------
+
+**Always use the wow.exe and NOT the launcher to start your WoW-Client**
+
+Start your WoW-Client with the wow.exe and login with your previously created account name (NOT email) and password.
+
+Note that if this account is GM-Account, you can use lots of nice commands to get around, (remark the . with which they all start) ie:
+
+* ++.tele <location>++
+* ++.lookup++
+* ++.npc info and .npc aiinfo++
+* ++.modify aspeed <rate>++
+* ++.gm fly on++ (note that although the command is available, it does not work on the classic core)
+
+
+*Enjoy running and messing with your CMaNGOS server!*
+

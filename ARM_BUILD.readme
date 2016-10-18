@@ -1,0 +1,4 @@
+mkdir build;
+cd build;
+export PATH=$PATH:$PWD
+cmake ../ -DCMAKE_INSTALL_PREFIX=/opt/wowserver/data -DBUILD_EXTRACTOR=ON -DBUILD_VMAP_EXTRACTOR=ON -DBUILD_MMAP_EXTRACTOR=ON -DPCH=1 -DDEBUG=0 -DCMAKE_TOOLCHAIN_FILE=../cmangos-arm-toolchain.cmake

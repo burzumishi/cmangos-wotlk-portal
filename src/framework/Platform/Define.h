@@ -74,6 +74,8 @@
 #    endif
 #  elif defined(__x86_64__)
 #    define MANGOS_IMPORT
+#  elif defined(__arm__)
+#    define MANGOS_IMPORT
 #  else
 #    define MANGOS_IMPORT __attribute__ ((cdecl))
 #  endif //__APPLE_CC__ && BIG_ENDIAN
