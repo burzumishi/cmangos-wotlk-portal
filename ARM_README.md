@@ -5,26 +5,26 @@ CMangos on <arm> machines
 =========================
 
 
-1. Introduction
+# Introduction
 
 This CMangos source was modified for build on "arm" machines, it should build in other architectures as well.
 
 
-2. ChangeLog
+# ChangeLog
 
 - Added "arm" arquitecture to CMakefiles.
 - Modified "g3dlite" headers and "System.cpp" for building properly in "arm" machines.
 - Mofified "src/mangos/CMakefile" to add "-lz" because it was failing linking "mangos" executable.
 
 
-3. TODO
+# TODO
 
 - Maybe some server need to be modified to increase performance, this is pending on some testings ;-)
 - Check how to execute "genrev" from CMakefiles, exporting "/home/you/sources/cmangos/build" to user environment PATH is not working on "qemu" tests, must be executed manually to generate required header file "revision.h".
 - Check if "mangos" executable is linking against "libz" (-lz).
 
 
-4. Known issues
+# Known issues
 
 - "revision.h" not found!
 
@@ -36,7 +36,7 @@ This CMangos source was modified for build on "arm" machines, it should build in
    Problem:  "mangosd" executable linking fails with unresolved symbols for libz "uncompress".
    Solution: Modify "./build/src/mangosd/CMakeFiles/mangosd.dir/link.txt" file to add "-lz".
 
-5. Build CMangos on ARM
+# Build CMangos on ARM
 
 Type or copy & paste the following commands from source directory:
 
@@ -55,12 +55,12 @@ cmake ../ -DCMAKE_INSTALL_PREFIX=$INSTALLDIR \
   -DCMAKE_TOOLCHAIN_FILE=../cmangos-arm-toolchain.cmake
 ```
 
-6. Source Revisions
+# Source Revisions
 
 * 0001beta - Initial revision (does not build <atm>)
 
 
-7. Credits
+# Credits
 
 Antonio Cao (@burzumishi) 2016
 
